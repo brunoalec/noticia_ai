@@ -1,0 +1,16 @@
+Analise a seguinte notícia e extraia as informações solicitadas.
+
+Título: {{titulo}}
+Descrição: {{descricao}}
+
+Extraia:
+1. A entidade principal (pessoa, organização ou tema central)
+2. {{num_entidades}} entidades secundárias relevantes
+3. Um script narrado em português para um vídeo curto sobre esta notícia
+
+Responda APENAS com JSON no formato:
+{
+  "main_entity": "nome da entidade principal",
+  "secondary_entities": ["entidade1", "entidade2"],
+  "script": "texto do script narrado"
+}
