@@ -93,7 +93,7 @@ export default function Home() {
   };
 
   return (
-    <main className="container mx-auto p-6 max-w-4xl">
+    <main className="mx-auto p-6" style={{ maxWidth: "1000px" }}>
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-2xl font-bold">NOTICIA_AI</h1>

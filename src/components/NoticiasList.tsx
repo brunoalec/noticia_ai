@@ -119,12 +119,21 @@ export default function NoticiasList({ selectedIds, onSelectionChange, refreshTr
                 />
                 <div className="flex-1 min-w-0">
                   <div className="font-medium truncate">{n.titulo}</div>
-                  <div className="text-gray-400 text-xs flex gap-3">
+                  <div className="text-gray-400 text-xs flex gap-3 mt-0.5">
                     <span>{n.fonte}</span>
                     <span>{n.data_publicacao ? new Date(n.data_publicacao).toLocaleDateString("pt-BR") : ""}</span>
                     <span className={STATUS_COLORS[n.status] || ""}>{n.status}</span>
                   </div>
                 </div>
+                <a
+                  href={n.link}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={(e) => e.stopPropagation()}
+                  className="text-blue-400 hover:text-blue-300 text-xs px-2 py-1 bg-gray-700 rounded whitespace-nowrap ml-2 shrink-0"
+                >
+                  Abrir ↗
+                </a>
               </label>
             ))}
           </div>
