@@ -107,34 +107,40 @@ export default function NoticiasList({ selectedIds, onSelectionChange, refreshTr
           </div>
           <div className="space-y-1 max-h-96 overflow-y-auto">
             {noticias.map((n) => (
-              <label
+              <div
                 key={n.id}
-                className="flex items-start gap-2 bg-gray-800 rounded px-3 py-2 text-sm cursor-pointer hover:bg-gray-750"
+                className="bg-gray-800 rounded px-3 py-2 text-sm"
               >
-                <input
-                  type="checkbox"
-                  checked={selectedIds.includes(n.id)}
-                  onChange={() => toggleSelect(n.id)}
-                  className="mt-1 rounded"
-                />
-                <div className="flex-1 min-w-0">
-                  <div className="font-medium truncate">{n.titulo}</div>
-                  <div className="text-gray-400 text-xs flex gap-3 mt-0.5">
-                    <span>{n.fonte}</span>
-                    <span>{n.data_publicacao ? new Date(n.data_publicacao).toLocaleDateString("pt-BR") : ""}</span>
-                    <span className={STATUS_COLORS[n.status] || ""}>{n.status}</span>
+                <div className="flex items-start gap-2">
+                  <input
+                    type="checkbox"
+                    checked={selectedIds.includes(n.id)}
+                    onChange={() => toggleSelect(n.id)}
+                    className="mt-1 rounded cursor-pointer"
+                  />
+                  <div className="flex-1 min-w-0">
+                    <div className="font-medium truncate">{n.titulo}</div>
+                    {n.descricao && (
+                      <div className="text-gray-400 text-xs leading-relaxed line-clamp-3 mt-0.5"
+                        dangerouslySetInnerHTML={{ __html: n.descricao }}
+                      />
+                    )}
+                    <div className="text-gray-400 text-xs flex gap-3 mt-0.5">
+                      <span>{n.fonte}</span>
+                      <span>{n.data_publicacao ? new Date(n.data_publicacao).toLocaleDateString("pt-BR") : ""}</span>
+                      <span className={STATUS_COLORS[n.status] || ""}>{n.status}</span>
+                    </div>
                   </div>
+                  <a
+                    href={n.link}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-blue-400 hover:text-blue-300 text-xs px-2 py-1 bg-gray-700 rounded whitespace-nowrap shrink-0"
+                  >
+                    Abrir ↗
+                  </a>
                 </div>
-                <a
-                  href={n.link}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  onClick={(e) => e.stopPropagation()}
-                  className="text-blue-400 hover:text-blue-300 text-xs px-2 py-1 bg-gray-700 rounded whitespace-nowrap ml-2 shrink-0"
-                >
-                  Abrir ↗
-                </a>
-              </label>
+              </div>
             ))}
           </div>
         </>
