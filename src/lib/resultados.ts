@@ -42,7 +42,40 @@ export function getResultadoByNoticiaId(noticiaId: number): Resultado | undefine
   return db.prepare("SELECT * FROM resultados WHERE noticia_id = ?").get(noticiaId) as Resultado | undefined;
 }
 
-export function getAllResultados(): Resultado[] {
+export function getAllResultados(): (Resultado & { titulo_noticia?: string })[] {
   const db = getDb();
-  return db.prepare("SELECT * FROM resultados ORDER BY data_processamento DESC").all() as Resultado[];
+  return db.prepare(`
+    SELECT r.*, n.titulo as titulo_noticia
+    FROM resultados r
+    LEFT JOIN noticias n ON r.noticia_id = n.id
+    ORDER BY r.data_processamento DESC
+  `).all() as (Resultado & { titulo_noticia?: string })[];
+}
+
+export function updateResultado(id: number, data: { entidade_principal?: string; entidades_secundarias?: string[]; script?: string }): void {
+  const db = getDb();
+  const fields: string[] = [];
+  const values: unknown[] = [];
+
+  if (data.entidade_principal !== undefined) {
+    fields.push("entidade_principal = ?");
+    values.push(data.entidade_principal);
+  }
+  if (data.entidades_secundarias !== undefined) {
+    fields.push("entidades_secundarias = ?");
+    values.push(JSON.stringify(data.entidades_secundarias));
+  }
+  if (data.script !== undefined) {
+    fields.push("script = ?");
+    values.push(data.script);
+  }
+
+  if (fields.length === 0) return;
+  values.push(id);
+  db.prepare(`UPDATE resultados SET ${fields.join(", ")} WHERE id = ?`).run(...values);
+}
+
+export function deleteResultado(id: number): void {
+  const db = getDb();
+  db.prepare("DELETE FROM resultados WHERE id = ?").run(id);
 }

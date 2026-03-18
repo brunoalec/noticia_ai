@@ -5,6 +5,7 @@ import FeedManager from "@/components/FeedManager";
 import NoticiasList from "@/components/NoticiasList";
 import PipelineControls from "@/components/PipelineControls";
 import LogPanel, { LogEntry } from "@/components/LogPanel";
+import ResultadosTable from "@/components/ResultadosTable";
 
 export default function Home() {
   const [feedsOpen, setFeedsOpen] = useState(false);
@@ -13,7 +14,7 @@ export default function Home() {
   const [isRunning, setIsRunning] = useState(false);
   const [logs, setLogs] = useState<LogEntry[]>([]);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
-  const [report, setReport] = useState<{ total: number; sucesso: number; erros: number; detalhes: string[] } | null>(null);
+  const [report, setReport] = useState<{ total: number; sucesso: number; erro: number; resultados: { noticiaId: number; titulo: string; success: boolean; error?: string }[] } | null>(null);
 
   const addLog = useCallback((type: LogEntry["type"], message: string) => {
     const timestamp = new Date().toLocaleTimeString("pt-BR");
@@ -61,10 +62,18 @@ export default function Home() {
             if (!line.trim()) continue;
             try {
               const parsed = JSON.parse(line);
-              if (parsed.type === "log") {
-                addLog(parsed.level || "info", parsed.message);
-              } else if (parsed.type === "report") {
+              if (parsed.type === "report") {
                 setReport(parsed.data);
+              } else if (parsed.type === "log") {
+                addLog(parsed.level || "info", parsed.message);
+              } else if (parsed.message) {
+                // PipelineLog format from backend
+                const msg = parsed.message as string;
+                let level: LogEntry["type"] = "info";
+                if (msg.includes("[FINAL] sucesso")) level = "success";
+                else if (msg.includes("[FINAL] erro") || msg.includes("erro")) level = "error";
+                else if (msg.includes("tentativa") && !msg.includes("tentativa 1")) level = "retry";
+                addLog(level, msg);
               }
             } catch {
               addLog("info", line);
@@ -136,12 +145,12 @@ export default function Home() {
           <div className="flex gap-4 mb-3 text-sm">
             <span>Total: <span className="font-bold">{report.total}</span></span>
             <span className="text-green-400">Sucesso: <span className="font-bold">{report.sucesso}</span></span>
-            <span className="text-red-400">Erros: <span className="font-bold">{report.erros}</span></span>
+            <span className="text-red-400">Erros: <span className="font-bold">{report.erro}</span></span>
           </div>
-          {report.detalhes.length > 0 && (
+          {report.resultados?.filter((r) => !r.success).length > 0 && (
             <ul className="text-sm text-red-300 space-y-1">
-              {report.detalhes.map((d, i) => (
-                <li key={i}>• {d}</li>
+              {report.resultados.filter((r) => !r.success).map((r, i) => (
+                <li key={i}>• {r.titulo} → {r.error}</li>
               ))}
             </ul>
           )}
@@ -153,6 +162,8 @@ export default function Home() {
         onClose={() => setFeedsOpen(false)}
         onFeedsChange={() => setRefreshTrigger((t) => t + 1)}
       />
+
+      <ResultadosTable refreshTrigger={refreshTrigger} />
     </main>
   );
 }
